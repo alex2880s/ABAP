@@ -1,0 +1,123 @@
+@Metadata.layer: #CORE
+@UI: {
+  headerInfo: { typeName: 'Order',
+                typeNamePlural: 'Orders',
+                typeImageUrl: 'https://i7.pngguru.com/preview/423/632/57/computer-icons-purchase-order-order-fulfillment-purchasing-order-icon.jpg'
+             
+               }
+     }          
+
+annotate view ZSA_C_MRKT_ORDER
+    with 
+{
+     @UI.facet: [ 
+             { id: 'GenInfo',
+               type: #COLLECTION,
+               label: 'General Information',
+               position: 10               
+             },
+             { id: 'AdminData',
+               type: #COLLECTION,
+               label: 'Admin Data',
+               position: 20               
+             },                 
+             { id:            'BasicData',
+               purpose:       #STANDARD ,
+               parentId:      'GenInfo',
+               type:          #FIELDGROUP_REFERENCE,
+               label:         'Basic Data',
+               position:       10,
+               targetQualifier: 'BasicData' },
+                          { id:            'CreateInf',
+               purpose:       #STANDARD ,
+               parentId:      'AdminData',
+               type:          #FIELDGROUP_REFERENCE,
+               label:         'Create Info',
+               position:       10,
+               targetQualifier: 'CreateInf' },
+              { id:             'ChangeInf',
+               purpose:       #STANDARD ,
+               parentId:      'AdminData',
+               type:          #FIELDGROUP_REFERENCE,
+               label:         'Change Info',
+               position:       20,
+               targetQualifier: 'ChangeInf' } ]
+    
+    @UI.hidden: true
+    ProdUuid;
+    @UI.hidden: true
+    MrktUuid;
+    @UI.hidden: true
+    OrderUuid;
+@UI: {
+    lineItem: [ { position: 10, importance: #HIGH, label: 'Order ID' } ],
+    fieldGroup: [ { qualifier: 'BasicData',
+                   position: 10,
+                   label: 'Order ID' } ],
+    identification: [{position: 10 }],
+    dataPoint: { title: 'Order ID' }                   
+    }    
+    Orderid;
+@UI: {
+    lineItem: [ { position: 40, importance: #HIGH, label: 'Quantity' } ],
+    fieldGroup: [ { qualifier: 'BasicData',
+                   position: 40,
+                   label: 'Quantity' } ],
+    identification: [{position: 40 }]                  
+    }       
+    Quantity;
+@UI: {
+    lineItem: [ { position: 20, importance: #HIGH, label: 'Year' } ],
+    fieldGroup: [ { qualifier: 'BasicData',
+                   position: 20,
+                   label: 'Year' } ],
+    identification: [{position: 20 }]                  
+    }      
+    CalendarYear;
+@UI: {
+    lineItem: [ { position: 30, importance: #HIGH, label: 'Delivery date' } ],
+    fieldGroup: [ { qualifier: 'BasicData',
+                   position: 30,
+                   label: 'Delivery date' } ],
+    identification: [{position: 30 }]                  
+    }       
+    DeliveryDate;
+@UI: {
+    dataPoint: { title: 'Net Amount1' }, 
+    identification: [{position: 40 }] 
+    }      
+    Netamount;
+@UI: {
+    dataPoint: { title: 'Gross Amount' } 
+    }    
+    Grossamount;
+@UI.hidden: true    
+    Amountcurr;
+@UI: {  
+       fieldGroup: [ { qualifier: 'CreateInf',
+                       position: 10 } ] 
+     }
+CreatedBy;
+@UI: {  
+       fieldGroup: [ { qualifier: 'CreateInf',
+                       position: 20, label: 'Created On' } 
+                        ] 
+     }
+CreationTime;
+
+@UI: {  
+       fieldGroup: [ { qualifier: 'ChangeInf',
+                       position: 10 } ] 
+     }
+ChangedBy;
+
+@UI: {  
+       fieldGroup: [ { qualifier: 'ChangeInf',
+                       position: 20, label: 'Changed On' } ] 
+     }
+ChangeTime;
+    
+    @UI.hidden: true
+    prodid;
+    
+}

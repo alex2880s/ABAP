@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_MSAG" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <T100A>
+    <ARBGB>ZSA_MC_PRODUCT</ARBGB>
+    <MASTERLANG>E</MASTERLANG>
+    <STEXT>Message class</STEXT>
+   </T100A>
+   <T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZSA_MC_PRODUCT</ARBGB>
+     <MSGNR>001</MSGNR>
+     <TEXT>Product group &amp;1 doesn&apos;t exist</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZSA_MC_PRODUCT</ARBGB>
+     <MSGNR>002</MSGNR>
+     <TEXT>Product ID already exist</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZSA_MC_PRODUCT</ARBGB>
+     <MSGNR>003</MSGNR>
+     <TEXT>Market &amp;1 doesn&apos;t exists</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZSA_MC_PRODUCT</ARBGB>
+     <MSGNR>004</MSGNR>
+     <TEXT>&amp;1 Date must be equal or greater then today</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZSA_MC_PRODUCT</ARBGB>
+     <MSGNR>005</MSGNR>
+     <TEXT>End Date must be greater then Start Date</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZSA_MC_PRODUCT</ARBGB>
+     <MSGNR>006</MSGNR>
+     <TEXT>This market is already assigned to the product</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZSA_MC_PRODUCT</ARBGB>
+     <MSGNR>007</MSGNR>
+     <TEXT>There isn&apos;t external price for this ID</TEXT>
+    </T100>
+   </T100>
+  </asx:values>
+ </asx:abap>
+</abapGit>
