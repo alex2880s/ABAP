@@ -19,7 +19,8 @@ CLASS Zsa_CL_GENERATE_DATA IMPLEMENTATION.
     DATA: lt_prod_grs  TYPE TABLE OF zsa_d_prod_group,
           lt_phases    TYPE TABLE OF zsa_d_phase,
           lt_markets   TYPE TABLE OF zsa_d_market,
-          lt_uom       TYPE TABLE OF zsa_d_uom.
+          lt_uom       TYPE TABLE OF zsa_d_uom,
+          lt_language  TYPE TABLE OF zsa_d_langu.
 
 *** PRODUCT GROUPS
 *   fill internal table (itab)
@@ -66,11 +67,11 @@ CLASS Zsa_CL_GENERATE_DATA IMPLEMENTATION.
     lt_markets = VALUE #(
         ( mrktid  = '1' mrktname = 'Russia'  imageurl = 'https://cdn.webshopapp.com/shops/94414/files/54940426/russia-flag-image-free-download.jpg' )
         ( mrktid  = '2' mrktname = 'Belarus' imageurl = 'https://cdn.countryflags.com/thumbs/belarus/flag-400.png' )
-        ( mrktid  = '3' mrktname = 'UK'      imageurl = 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Flag_of_the_United_Kingdom.svg/640px-Flag_of_the_United_Kingdom.svg.png' )
+        ( mrktid  = '3' mrktname = 'United Kingdom' imageurl = 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Flag_of_the_United_Kingdom.svg/640px-Flag_of_the_United_Kingdom.svg.png' )
         ( mrktid  = '4' mrktname = 'France'  imageurl = 'https://cdn.webshopapp.com/shops/94414/files/54002660/france-flag-image-free-download.jpg' )
         ( mrktid  = '5' mrktname = 'Germany' imageurl = 'https://cdn.webshopapp.com/shops/94414/files/54006402/germany-flag-image-free-download.jpg' )
         ( mrktid  = '6' mrktname = 'Italy'   imageurl = 'https://cdn.countryflags.com/thumbs/italy/flag-400.png' )
-        ( mrktid  = '7' mrktname = 'USA'     imageurl = 'https://cdn.webshopapp.com/shops/94414/files/54958906/the-united-states-flag-image-free-download.jpg' )
+        ( mrktid  = '7' mrktname = 'United States'     imageurl = 'https://cdn.webshopapp.com/shops/94414/files/54958906/the-united-states-flag-image-free-download.jpg' )
         ( mrktid  = '8' mrktname = 'Japan'   imageurl = 'https://image.freepik.com/free-vector/illustration-japan-flag_53876-27128.jpg' )
         ( mrktid  = '9' mrktname = 'Poland'  imageurl = 'https://cdn.webshopapp.com/shops/94414/files/54940016/poland-flag-image-free-download.jpg' )
      ).
@@ -110,6 +111,26 @@ CLASS Zsa_CL_GENERATE_DATA IMPLEMENTATION.
     SELECT * FROM zsa_d_uom INTO TABLE @lt_uom.
     out->write( sy-dbcnt ).
     out->write( 'uom data inserted successfully!').
+
+***LANGUAGE
+*   fill internal table (itab)
+           lt_language = VALUE #(
+              ( code = 'RU' country = 'Russia' )
+              ( code = 'FR' country = 'France' )
+              ( code = 'EN' country = 'United Kingdom' )
+              ( code = 'DE' country = 'Germany' )
+              ( code = 'IT' country = 'Italy' )
+              ( code = 'ES' country = 'Spain' )
+            ).
+*    Delete the possible entries in the database table - in case it was already filled
+     DELETE FROM zsa_d_langu.
+*    Insert the new table entries
+     INSERT zsa_d_langu FROM TABLE @lt_language.
+
+*   check the result
+    SELECT * FROM zsa_d_langu INTO TABLE @lt_language.
+    out->write( sy-dbcnt ).
+    out->write( 'language inserted successfully!').
 
   ENDMETHOD.
 ENDCLASS.

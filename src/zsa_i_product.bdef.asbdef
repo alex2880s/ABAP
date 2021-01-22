@@ -1,37 +1,57 @@
 managed;
+with draft;
 
 define behavior for ZSA_I_PRODUCT alias Product
 implementation in class zsa_sa_i_product unique
 persistent table zsa_d_product
-lock master
+draft table zsa_d_product_dr
+lock master total etag ChangeTime
 //authorization master ( instance )
-etag master ChangeTime
+etag master LocalLastChangedAt
 {
 
   create;
   update;
   delete;
 
-  association _Market { create; }
+  association _Market { create; with draft; }
 
-  field ( numbering : managed, readonly: update ) ProdUuid;
 
-  field ( readonly ) ChangeTime, ChangedBy, CreationTime, CreatedBy, Phaseid, ExtPrice;
+  field ( numbering : managed, readonly : update ) ProdUuid;
 
-  field ( mandatory:create ) Prodid, Pgid, Price, PriceCurrency;
+  field ( readonly ) ChangeTime, ChangedBy, CreationTime, CreatedBy, Phaseid, ExtPrice, LocalLastChangedAt,PgnameTr;
 
-  field ( features : instance ) Prodid, Pgid, Height, Depth, Width, SizeUom, Price, PriceCurrency, Taxrate;
+  //  field ( mandatory:create ) Prodid, Pgname, Price, PriceCurrency;
+
+  field ( features : instance ) Prodid, Pgname, Height, Depth, Width, SizeUom, Price, PriceCurrency, Taxrate;
 
 
   determination setInitialStatus on modify { create; }
-  determination setExternalPrice on save { create; }
+  determination setExternalPrice on save { field Prodid; create; }
+  determination setPgnameTranslation on save { field Pgname; field TransCode; }
 
 
   action ( features : instance ) moveToNextPhase result [1] $self;
   action ( features : instance ) copyProduct parameter ZSA_A_PRODID result [1] $self;
+  action ( features : instance ) getProductTransl result [1] $self;
 
-  validation validateProductGroup on save { field Pgid; create; }
-  validation validateProductID on save { field Prodid; create; }
+  validation validateProductGroup on save { create; }
+  validation validateProductID on save { field Prodid; }
+  validation validateExtID on save { field Prodid; }
+
+  draft determine action Prepare
+  {
+    validation validateExtID;
+    validation validateProductGroup;
+    validation validateProductID;
+    validation Market ~ validateMarket;
+    validation Market ~ validateDuplicate;
+    validation Market ~ validateStartDate;
+    validation Market ~ validateEndDate;
+    validation MrktOrder ~ validateDeliveryDate;
+    validation MrktOrder ~ validateBusinessPartner;
+    validation MrktOrder ~ validateQuantity;
+  }
 
   mapping for zsa_d_product
   {
@@ -50,45 +70,52 @@ etag master ChangeTime
     Taxrate = taxrate;
     Width = width;
     Pgid = pgid;
+    Pgname = pgname;
+    PgnameTr = pgname_tr;
+    TransCode = trans_code;
     ExtPrice = external_price;
+    LocalLastChangedAt = local_last_changed_at;
   }
-
 }
 
 define behavior for ZSA_I_PROD_MRKT alias Market
 implementation in class zsa_sa_i_market unique
 persistent table zsa_d_prod_mrkt
+draft table zsa_d_pr_mr_dr
 lock dependent by _Product
 //authorization master ( instance )
-etag master ChangeTime
+etag master LocalLastChangedAt
 {
-
 
   update;
   delete;
 
-  association _Product;
-  association _Order { create (features: instance); }
+  association _Product { with draft; }
+  association _Order { create ( features : instance ); with draft; }
 
-  field ( numbering : managed, readonly: update ) MrktUuid;
-  field ( readonly: update ) ProdUuid;
-  field ( readonly ) ChangeTime, ChangedBy, CreationTime, CreatedBy, ChangeTime_Date, CreationTime_Date;
-  field ( readonly ) Status;
+  field ( numbering : managed, readonly : update ) MrktUuid;
+  field ( readonly : update ) ProdUuid;
+  field ( readonly ) ChangeTime, ChangedBy, CreationTime, CreatedBy, ChangeTime_Date,
+  CreationTime_Date, LocalLastChangedAt, IsoCode;
+  field ( readonly ) Status, TotalGrossamount, TotalNetamount, TotalQuantity;
 
-  field ( mandatory:create ) Mrktid, Startdate;
+  //  field ( mandatory:create ) Mrktname, Startdate;
 
   action ( features : instance ) confirm result [1] $self;
 
-  validation validateMarket     on save {field  Mrktid; create;}
-  validation validateStartDate  on save {field  Startdate; create;}
-  validation validateEndDate    on save {field  Enddate; create;}
-  validation validateDuplicate  on save {field  Mrktid; create;}
+  validation validateMarket on save { field Mrktname; create; }
+  validation validateStartDate on save { field Startdate; create; }
+  validation validateEndDate on save { field Enddate; create; }
+  validation validateDuplicate on save { field Mrktname; create; }
+  determination setIsoCode on modify { create; }
 
   mapping for zsa_d_prod_mrkt
   {
     MrktUuid = mrkt_uuid;
     ProdUuid = prod_uuid;
     Mrktid = mrktid;
+    Mrktname = mrkname;
+    IsoCode  = iso_code;
     CreatedBy = created_by;
     ChangeTime = change_time;
     ChangedBy = changed_by;
@@ -96,39 +123,56 @@ etag master ChangeTime
     Enddate = enddate;
     Startdate = startdate;
     Status = status;
-  }
+    LocalLastChangedAt = local_last_changed_at;
 
+  }
 }
 
 define behavior for ZSA_I_MRKT_ORDER alias MrktOrder
 implementation in class zsa_sa_i_order unique
 persistent table zsa_d_mrkt_order
+draft table zsa_d_mr_ord_dr
 lock dependent by _Product
-etag master ChangeTime
+etag master LocalLastChangedAt
 {
   update;
   delete;
 
+  determination setOrderId on modify { create; }
+  determination setYear on save { field DeliveryDate; create; }
+  determination calculateAmount on save { field Quantity; create; }
 
-  determination setOrderId on save  { create; }
-  determination setYear    on save  { create; }
-  determination calculateAmount on save { create; }
 
-  association _Product;
-//  association _Market;
+  association _Product { with draft; }
+  association _Market { with draft; }
 
-  field ( numbering : managed, readonly: update ) OrderUuid;
-  field ( readonly: update ) ProdUuid, MrktUuid;
-  field ( readonly ) Orderid, CalendarYear, prdid;
+  field ( numbering : managed, readonly : update ) OrderUuid;
+  field ( readonly : update ) ProdUuid, MrktUuid;
+  field ( readonly ) Status, Orderid, CalendarYear, prdid, ChangeTime, ChangedBy, CreatedBy, CreationTime, LocalLastChangedAt,
+  Netamount, Grossamount, Amountcurr;
+//  field ( readonly : update ) BusinessPartnerGroup, BusinessPartnerName;
+
+  field ( features : instance ) DeliveryDate, Quantity, BusinessPartner, BusinessPartnerGroup, BusinessPartnerName,
+                                Country, Locality, Street, House;
+
+  validation validateDeliveryDate    on save { field DeliveryDate; create; }
+  validation validateBusinessPartner on save { field BusinessPartner; }
+  validation validateQuantity        on save { field Quantity; }
+
+  action ( features : instance ) confirmOrder result [1] $self;
 
   mapping for zsa_d_mrkt_order
   {
     Orderid = orderid;
+    Status  = status;
     CalendarYear = calendar_year;
     DeliveryDate = delivery_date;
     Quantity = quantity;
     Netamount = netamount;
     Grossamount = grossamount;
+    BusinessPartner = busspartner;
+    BusinessPartnerGroup = busspartner_gr;
+    BusinessPartnerName  = busspartner_n;
     ChangeTime = change_time;
     ChangedBy = changed_by;
     CreatedBy = created_by;
@@ -137,6 +181,10 @@ etag master ChangeTime
     Amountcurr = amountcurr;
     OrderUuid = order_uuid;
     ProdUuid = prod_uuid;
+    LocalLastChangedAt = local_last_changed_at;
+    Country = contry;
+    Locality = locality;
+    Street = street;
+    House = house;
   }
-
 }

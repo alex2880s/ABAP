@@ -1,36 +1,39 @@
 projection;
-
+use draft;
 define behavior for ZSA_C_PRODUCT alias Product
-use etag
+//use etag
 {
   use create;
   use update;
   use delete;
 
-  use association _Market { create; }
+  use association _Market { create;with draft; }
 
   use action moveToNextPhase;
   use action copyProduct;
+  use action getProductTransl;
 }
 
 define behavior for ZSA_C_PROD_MRKT alias Market
-use etag
+//use etag
 {
 
   use update;
   use delete;
 
-  use association _Product;
-  use association _Order { create; }
+  use association _Product{with draft;}
+  use association _Order { create;with draft; }
 
   use action confirm;
 }
 
 define behavior for ZSA_C_MRKT_ORDER alias MrktOrder
-use etag
+//use etag
 {
+  use action confirmOrder;
   use update;
   use delete;
 //  use association _Market;
-  use association _Product;
+  use association _Product{with draft;}
+  use association _Market{with draft;}
 }

@@ -3,7 +3,8 @@
   headerInfo: { typeName: 'Market',
                 typeNamePlural: 'Markets',
                 imageUrl: '_MarketDesc.Imageurl'
-               }
+               },
+     presentationVariant: [{ sortOrder: [{ by: 'Mrktid', direction:  #ASC }, { by: 'Status', direction:  #ASC }] }]               
      }          
 
 
@@ -64,26 +65,34 @@ annotate view ZSA_C_PROD_MRKT
                 targetElement:   '_Order'}  ]
 
 
-@UI.identification: [
-    { type: #FOR_ACTION, dataAction:'confirm', label: 'Confirm', position: 10 } ] 
-
-
-   
+@UI:{
+    identification: [ { type: #FOR_ACTION, dataAction:'confirm', label: 'Confirm', position: 10 } ],
+    lineItem:       [ { type: #FOR_ACTION, dataAction:'confirm', label: 'Confirm', position: 10 } ]
+    }
+    
 @UI.hidden: true
 ProdUuid;
 @UI.hidden: true
 MrktUuid;
+@UI.hidden: true
+Mrktid;
 @UI: {
     lineItem: [ { position: 10, importance: #HIGH, label: 'Market' } ],
     fieldGroup: [ { qualifier: 'BasicData',
                    position: 20,
                    label: 'Market' } ],
-//    dataPoint: { title: 'Country' },
+    dataPoint: { title: 'Country' },
     identification: [{position: 10 }]                  
     }
-Mrktid;
-@UI.dataPoint: { title: 'Country' }
 Mrktname;
+@UI: {
+    lineItem: [ { position: 15, importance: #HIGH, label: 'ISO-Code' } ],
+    fieldGroup: [ { qualifier: 'BasicData',
+                   position: 25,
+                   label: 'ISO-Code' } ],
+    identification: [{position: 15 }]                  
+    }
+IsoCode;
 @UI: {
     lineItem: [ { position: 20, importance: #HIGH, label: 'Confirmed?', criticality: 'Criticality' } ],
     fieldGroup: [ { qualifier: 'BasicData',
@@ -123,28 +132,30 @@ amountcurr;
 
 @UI: {  
        fieldGroup: [ { qualifier: 'CreateInf',
-                       position: 10 } ] 
+                       position: 10,
+                       label: 'Created By' } ] 
      }
 CreatedBy;
+@UI.hidden: true
+CreationTime_Date;
 @UI: {  
        fieldGroup: [ { qualifier: 'CreateInf',
                        position: 20, label: 'Created On' } 
                         ] 
      }
-CreationTime_Date;
-@UI.hidden: true
 CreationTime;
 @UI: {  
        fieldGroup: [ { qualifier: 'ChangeInf',
-                       position: 10 } ] 
-     }
+                       position: 10,
+                       label: 'Changed By' } ] 
+     } 
 ChangedBy;
-
-@UI.hidden: true     
-ChangeTime;
 @UI: {  
        fieldGroup: [ { qualifier: 'ChangeInf',
                        position: 20, label: 'Changed On' } ] 
      }
+ChangeTime;
+
+@UI.hidden: true      
 ChangeTime_Date;    
 }

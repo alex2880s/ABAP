@@ -1,5 +1,4 @@
 CLASS lhc_product DEFINITION INHERITING FROM cl_abap_behavior_handler.
-
   PRIVATE SECTION.
 
     METHODS setInitialStatus FOR DETERMINE ON MODIFY
@@ -17,7 +16,12 @@ CLASS lhc_product DEFINITION INHERITING FROM cl_abap_behavior_handler.
       IMPORTING keys FOR ACTION Product~copyProduct RESULT result.
     METHODS setExternalPrice FOR DETERMINE ON SAVE
       IMPORTING keys FOR Product~setExternalPrice.
-
+    METHODS validateExtID FOR VALIDATE ON SAVE
+      IMPORTING keys FOR Product~validateExtID.
+    METHODS setPgnameTranslation FOR DETERMINE ON SAVE
+      IMPORTING keys FOR Product~setPgnameTranslation.
+    METHODS getProductTransl FOR MODIFY
+      IMPORTING keys FOR ACTION Product~getProductTransl RESULT result.
 ENDCLASS.
 
 CLASS lhc_product IMPLEMENTATION.
@@ -54,8 +58,8 @@ CLASS lhc_product IMPLEMENTATION.
     TYPES: ty_product LIKE LINE OF products.
 
     TYPES: BEGIN OF ty_products_avail.
-        INCLUDE TYPE ty_product.
-    TYPES: avail_phaseid TYPE ZSA_I_PRODUCT-PHASEID.
+             INCLUDE TYPE ty_product.
+    TYPES:   avail_phaseid TYPE zsa_i_product-phaseid.
     TYPES: END OF ty_products_avail.
 
     DATA: lt_product_avail TYPE STANDARD TABLE OF ty_products_avail,
@@ -68,32 +72,32 @@ CLASS lhc_product IMPLEMENTATION.
     RESULT DATA(markets)
     FAILED failed.
 
-   LOOP AT products INTO ls_product_avail.
+    LOOP AT products INTO ls_product_avail.
 
 
-      SELECT SINGLE Mrktid, produuid FROM @markets as market WHERE produuid = @ls_product_avail-produuid INTO @DATA(market_av).
-          IF market_av IS NOT INITIAL.
-            ls_product_avail-avail_phaseid = 2.
-          ENDIF.
-      SELECT SINGLE Mrktid, status FROM  @markets as market WHERE status = @abap_true AND
+      SELECT SINGLE Mrktid, produuid FROM @markets AS market WHERE produuid = @ls_product_avail-produuid INTO @DATA(market_av).
+      IF market_av IS NOT INITIAL.
+        ls_product_avail-avail_phaseid = 2.
+      ENDIF.
+      SELECT SINGLE Mrktid, status FROM  @markets AS market WHERE status = @abap_true AND
                                                           produuid = @ls_product_avail-produuid
                                                           INTO @DATA(market_av_conf).
-          IF market_av_conf IS NOT INITIAL AND ls_product_avail-avail_phaseid = 2.
-            ls_product_avail-avail_phaseid = 3.
+      IF market_av_conf IS NOT INITIAL AND ls_product_avail-avail_phaseid = 2.
+        ls_product_avail-avail_phaseid = 3.
 
-          ENDIF.
-     SELECT SINGLE Mrktid, enddate FROM  @markets as market WHERE produuid     = @ls_product_avail-produuid AND
-                                                                          ( enddate  > @sy-datum OR enddate IS INITIAL )
-                                               INTO @DATA(market_av_out).
-     IF market_av_out IS INITIAL AND ls_product_avail-avail_phaseid = 3.
-       ls_product_avail-avail_phaseid = 4.
-     ENDIF.
+      ENDIF.
+      SELECT SINGLE Mrktid, enddate FROM  @markets AS market WHERE produuid     = @ls_product_avail-produuid AND
+                                                                           ( enddate  > @sy-datum OR enddate IS INITIAL )
+                                                INTO @DATA(market_av_out).
+      IF market_av_out IS INITIAL AND ls_product_avail-avail_phaseid = 3.
+        ls_product_avail-avail_phaseid = 4.
+      ENDIF.
 
       APPEND ls_product_avail TO lt_product_avail.
       CLEAR market_av_conf.
       CLEAR market_av.
       CLEAR market_av_out.
-   ENDLOOP.
+    ENDLOOP.
 
     result =
       VALUE #(
@@ -108,7 +112,7 @@ CLASS lhc_product IMPLEMENTATION.
                                                     THEN if_abap_behv=>fc-f-mandatory
                                                 WHEN product-Phaseid  > 1
                                                      THEN if_abap_behv=>fc-f-read_only )
-              %field-Pgid             = COND #( WHEN product-Phaseid  = 1
+              %field-Pgname            = COND #( WHEN product-Phaseid  = 1
                                                     THEN if_abap_behv=>fc-f-mandatory
                                                 WHEN product-Phaseid  > 1
                                                      THEN if_abap_behv=>fc-f-read_only )
@@ -156,30 +160,31 @@ CLASS lhc_product IMPLEMENTATION.
 
   METHOD moveToNextPhase.
 
-  READ ENTITIES OF zsa_i_product IN LOCAL MODE
-    ENTITY Product
-    FIELDS ( Phaseid ) WITH CORRESPONDING #( keys )
-       RESULT DATA(lt_products).
-
-  DATA(lv_phaseid) = lt_products[ 1 ]-Phaseid.
-
-  DATA:
-       lv_next_id LIKE lv_phaseid.
-
-  IF lv_phaseid < 4.
-    lv_next_id = lv_phaseid + 1.
-  ENDIF.
-
-
-  MODIFY ENTITIES OF zsa_i_product IN LOCAL MODE
+    READ ENTITIES OF zsa_i_product IN LOCAL MODE
       ENTITY Product
-         UPDATE
-           FIELDS ( Phaseid )
-           WITH VALUE #( FOR key IN keys
-                           ( %tky         = key-%tky
-                             Phaseid = lv_next_id ) )
-      FAILED failed
-      REPORTED reported.
+      FIELDS ( Phaseid ) WITH CORRESPONDING #( keys )
+         RESULT DATA(lt_products).
+
+    DATA(lv_phaseid) = lt_products[ 1 ]-Phaseid.
+
+    DATA:
+         lv_next_id LIKE lv_phaseid.
+
+    IF lv_phaseid < 4.
+      lv_next_id = lv_phaseid + 1.
+    ENDIF.
+
+
+    MODIFY ENTITIES OF zsa_i_product IN LOCAL MODE
+        ENTITY Product
+           UPDATE
+             FIELDS ( Phaseid )
+             WITH VALUE #( FOR key IN keys
+                             ( %tky         = key-%tky
+
+                               Phaseid = lv_next_id ) )
+        FAILED failed
+        REPORTED reported.
 
     READ ENTITIES OF zsa_i_product IN LOCAL MODE
       ENTITY Product
@@ -196,20 +201,20 @@ CLASS lhc_product IMPLEMENTATION.
 
     READ ENTITIES OF zsa_i_product IN LOCAL MODE
       ENTITY Product
-        FIELDS ( Pgid ) WITH CORRESPONDING #( keys )
+        FIELDS ( Pgname ) WITH CORRESPONDING #( keys )
       RESULT DATA(products).
 
-    DATA prod_group TYPE SORTED TABLE OF zsa_d_prod_group WITH UNIQUE KEY pgid.
+    DATA prod_group TYPE SORTED TABLE OF zsa_d_prod_group WITH UNIQUE KEY pgname.
 
-    prod_group = CORRESPONDING #( products DISCARDING DUPLICATES MAPPING pgid =  pgid   EXCEPT * ).
+    prod_group = CORRESPONDING #( products DISCARDING DUPLICATES MAPPING pgname =  pgname   EXCEPT * ).
 
-    DELETE prod_group WHERE pgid IS INITIAL.
+    DELETE prod_group WHERE pgname IS INITIAL.
 
     IF prod_group IS NOT INITIAL.
 
-      SELECT FROM zsa_d_prod_group FIELDS pgid
+      SELECT FROM zsa_d_prod_group FIELDS pgname
         FOR ALL ENTRIES IN @prod_group
-        WHERE pgid = @prod_group-pgid
+        WHERE pgname = @prod_group-pgname
         INTO TABLE @DATA(prod_group_db).
     ENDIF.
 
@@ -219,7 +224,7 @@ CLASS lhc_product IMPLEMENTATION.
                        %state_area        = 'VALIDATE_PRODUCT_GROUP' )
         TO reported-product.
 
-      IF product-Pgid IS INITIAL OR NOT line_exists( prod_group_db[ pgid = product-Pgid ] ).
+      IF product-Pgname IS INITIAL OR NOT line_exists( prod_group_db[ pgname = product-Pgname ] ).
         APPEND VALUE #( %tky = product-%tky ) TO failed-product.
 
         APPEND VALUE #( %tky        = product-%tky
@@ -227,8 +232,8 @@ CLASS lhc_product IMPLEMENTATION.
                         %msg        = NEW zcm_product(
                                           severity = if_abap_behv_message=>severity-error
                                           textid   = zcm_product=>product_group_exist
-                                          pgid  = product-Pgid )
-                        %element-pgid = if_abap_behv=>mk-on )
+                                          pgname  = product-Pgname )
+                        %element-pgname = if_abap_behv=>mk-on )
           TO reported-product.
       ENDIF.
     ENDLOOP.
@@ -241,24 +246,24 @@ CLASS lhc_product IMPLEMENTATION.
       RESULT DATA(products).
 
     LOOP AT products INTO DATA(product).
-        APPEND VALUE #(  %tky               = product-%tky
-                         %state_area        = 'VALIDATE_PRODUCT_ID' )
-        TO reported-product.
+      APPEND VALUE #(  %tky               = product-%tky
+                       %state_area        = 'VALIDATE_PRODUCT_ID' )
+      TO reported-product.
 
-        SELECT SINGLE prodid FROM zsa_c_product
-            WHERE Prodid = @product-Prodid
-            INTO @DATA(ex_prod).
+      SELECT SINGLE prodid FROM zsa_c_product
+          WHERE Prodid = @product-Prodid
+          INTO @DATA(ex_prod).
 
-        IF product-Prodid IS INITIAL OR ex_prod IS NOT INITIAL.
-            APPEND VALUE #( %tky = product-%tky ) TO failed-product.
-            APPEND VALUE #( %tky        = product-%tky
-                            %state_area = 'VALIDATE_PRODUCT_ID'
-                            %msg        = NEW zcm_product(
-                                              severity = if_abap_behv_message=>severity-error
-                                              textid   = zcm_product=>product_id_exist )
-                        %element-Prodid = if_abap_behv=>mk-on )
-          TO reported-product.
-        ENDIF.
+      IF product-Prodid IS INITIAL OR ex_prod IS NOT INITIAL.
+        APPEND VALUE #( %tky = product-%tky ) TO failed-product.
+        APPEND VALUE #( %tky        = product-%tky
+                        %state_area = 'VALIDATE_PRODUCT_ID'
+                        %msg        = NEW zcm_product(
+                                          severity = if_abap_behv_message=>severity-error
+                                          textid   = zcm_product=>product_id_exist )
+                    %element-Prodid = if_abap_behv=>mk-on )
+      TO reported-product.
+      ENDIF.
 
     ENDLOOP.
 
@@ -281,9 +286,8 @@ CLASS lhc_product IMPLEMENTATION.
     DATA lt_create TYPE TABLE FOR CREATE zsa_i_product\\Product.
 
     LOOP AT keys INTO DATA(key).
-        DATA(lv_key) = key-%param-prodid.
+      DATA(lv_key) = key-%param-prodid.
     ENDLOOP.
-
 
     lt_create = VALUE #( FOR row IN  lt_read_result INDEX INTO idx
                              (
@@ -298,6 +302,7 @@ CLASS lhc_product IMPLEMENTATION.
                                Price  = row-Price
                                Phaseid = 1
                                Pgid = row-Pgid
+                               Pgname = row-Pgname
                                ChangeTime = lv_today
                                CreationTime = lv_today
                                CreatedBy = lv_user
@@ -318,6 +323,7 @@ CLASS lhc_product IMPLEMENTATION.
                          Price
                          Phaseid
                          Pgid
+                         Pgname
                          ChangeTime
                          CreationTime
                          CreatedBy
@@ -337,42 +343,149 @@ CLASS lhc_product IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD setExternalPrice.
-       DATA:
-            lv_extprice TYPE zsa_d_product-external_price.
+    DATA:
+         lv_extprice TYPE zsa_d_product-external_price.
 
-       READ ENTITIES OF zsa_i_product IN LOCAL MODE
-       ENTITY Product
-         FIELDS ( Prodid ) WITH CORRESPONDING #( keys )
-       RESULT DATA(products).
+    READ ENTITIES OF zsa_i_product IN LOCAL MODE
+    ENTITY Product
+      FIELDS ( Prodid ) WITH CORRESPONDING #( keys )
+    RESULT DATA(products).
 
-       DATA(lv_extID) = products[ 1 ]-Prodid.
+    DATA(lv_extID) = products[ 1 ]-Prodid.
 
-       zsa_cl_ext_call=>GET_EXT_PRICE_SOAP(
-                                            EXPORTING ip_id = lv_extID
-                                            IMPORTING ep_price = lv_extprice
-                                          ).
+    zsa_cl_ext_call=>get_ext_price_soap(
+                                         EXPORTING ip_id = lv_extID
+                                         IMPORTING ep_price = lv_extprice
+                                       ).
 
-        MODIFY ENTITIES OF zsa_i_product IN LOCAL MODE
-            ENTITY Product
-              UPDATE
-                FIELDS ( ExtPrice )
-                WITH VALUE #( FOR product IN products
-                              ( %tky         = product-%tky
-                                ExtPrice     = lv_extprice ) )
-            REPORTED DATA(update_reported).
+    MODIFY ENTITIES OF zsa_i_product IN LOCAL MODE
+        ENTITY Product
+          UPDATE
+            FIELDS ( ExtPrice )
+            WITH VALUE #( FOR product IN products
+                          ( %tky         = product-%tky
+                            ExtPrice     = lv_extprice ) )
+        REPORTED DATA(update_reported).
 
-       reported = CORRESPONDING #( DEEP update_reported ).
+    reported = CORRESPONDING #( DEEP update_reported ).
 
-       IF lv_extprice IS INITIAL.
-           APPEND VALUE #( %tky        = products[ 1 ]-%tky
-                           %msg        = NEW zcm_product(
-                                                          severity = if_abap_behv_message=>severity-warning
-                                                          textid   = zcm_product=>external_price
-                                                        )
-                          )
-                          TO reported-product.
-       ENDIF.
 
+  ENDMETHOD.
+
+  METHOD validateExtID.
+    TYPES:
+    lty_bool TYPE c LENGTH 1.
+
+    DATA:
+        lv_ext_id_exst TYPE lty_bool.
+
+    READ ENTITIES OF zsa_i_product IN LOCAL MODE
+      ENTITY Product
+        FIELDS ( Prodid ) WITH CORRESPONDING #( keys )
+      RESULT DATA(products).
+
+    DATA(lv_extID) = products[ 1 ]-Prodid.
+    zsa_cl_ext_call=>check_ext_id_exst(
+                                        EXPORTING ip_id = lv_extID
+                                        IMPORTING ep_exst = lv_ext_id_exst
+                                      ).
+
+    IF lv_ext_id_exst IS INITIAL.
+      APPEND VALUE #(
+                    %tky        = products[ 1 ]-%tky
+                    %msg            = NEW zcm_product(
+                                                      severity = if_abap_behv_message=>severity-information
+                                                      textid   = zcm_product=>external_price
+                                                     )
+                    %element-Prodid = if_abap_behv=>mk-on
+                   )
+                   TO reported-product.
+    ENDIF.
+  ENDMETHOD.
+
+  METHOD setPgnameTranslation.
+    DATA:
+         lv_pgnametr TYPE zsa_d_product-pgname_tr.
+
+    READ ENTITIES OF zsa_i_product IN LOCAL MODE
+    ENTITY Product
+      FIELDS ( Pgname TransCode ) WITH CORRESPONDING #( keys )
+    RESULT DATA(products).
+
+    DATA(lv_pgname)    = products[ 1 ]-Pgname.
+    DATA(lv_transcode) = products[ 1 ]-TransCode.
+
+    zsa_cl_ext_call=>get_translate( EXPORTING
+                                        ip_pgname = lv_pgname
+                                        ip_trcode = lv_transcode
+                                    IMPORTING
+                                        ep_pgname_tr = lv_pgnametr
+                                  ).
+
+    MODIFY ENTITIES OF zsa_i_product IN LOCAL MODE
+        ENTITY Product
+          UPDATE
+            FIELDS ( PgnameTr )
+            WITH VALUE #( FOR product IN products
+                          ( %tky         = product-%tky
+                            PgnameTr     = lv_pgnametr ) )
+        REPORTED DATA(update_reported).
+
+    reported = CORRESPONDING #( DEEP update_reported ).
+  ENDMETHOD.
+
+  METHOD getProductTransl.
+
+     DATA:
+         lv_pgnametr TYPE zsa_d_product-pgname_tr.
+
+     READ ENTITIES OF zsa_i_product IN LOCAL MODE
+     ENTITY Product
+       FIELDS ( Pgname TransCode ) WITH CORRESPONDING #( keys )
+     RESULT DATA(products).
+
+     DATA(lv_pgname)    = products[ 1 ]-Pgname.
+     DATA(lv_transcode) = products[ 1 ]-TransCode.
+
+     SELECT code FROM zsa_d_langu INTO TABLE @DATA(lt_avail_lang).
+
+     IF sy-subrc <> 0.
+                APPEND VALUE #(
+                    %tky        = products[ 1 ]-%tky
+                    %msg            = NEW zcm_product(
+                                                      severity   = if_abap_behv_message=>severity-error
+                                                      textid     = zcm_product=>no_language_code
+                                                     )
+                   )
+                   TO reported-product.
+     ENDIF.
+
+     LOOP AT lt_avail_lang ASSIGNING FIELD-SYMBOL(<lfs_lang>).
+        CLEAR lv_pgnametr.
+
+        CHECK <lfs_lang>-code <> lv_transcode.
+
+        zsa_cl_ext_call=>get_translate( EXPORTING
+                                        ip_pgname = lv_pgname
+                                        ip_trcode = <lfs_lang>-code
+                                       IMPORTING
+                                        ep_pgname_tr = lv_pgnametr
+                                  ).
+        APPEND VALUE #(
+                    %tky        = products[ 1 ]-%tky
+                    %msg            = NEW zcm_product(
+                                                      severity   = if_abap_behv_message=>severity-information
+                                                      textid     = zcm_product=>translation_info
+                                                      lang       = <lfs_lang>-code
+                                                      text_trans = lv_pgnametr
+                                                     )
+                   )
+                   TO reported-product.
+     ENDLOOP.
+
+     result = VALUE #( FOR product IN products
+                        ( %tky   = product-%tky
+                          %param = product ) ).
   ENDMETHOD.
 
 ENDCLASS.

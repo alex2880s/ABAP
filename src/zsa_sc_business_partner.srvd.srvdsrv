@@ -1,0 +1,5 @@
+@EndUserText.label: 'ZSA_SC_BUSINESS_PARTNER'
+@OData.schema.name: 'API_BUSINESS_PARTNER'
+define service ZSA_SC_BUSINESS_PARTNER {
+ expose ZSA_A_BUSINESSPARTNER; 
+ } 

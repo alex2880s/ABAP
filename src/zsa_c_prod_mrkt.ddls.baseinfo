@@ -3,7 +3,6 @@
 {
 "FROM":
 [
-"ZSA_I_MARKET",
 "ZSA_I_PROD_MRKT"
 ],
 "ASSOCIATED":

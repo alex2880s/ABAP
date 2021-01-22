@@ -3,7 +3,6 @@
 {
 "FROM":
 [
-"ZSA_I_PG",
 "ZSA_I_PHASE",
 "ZSA_I_PRODUCT"
 ],
@@ -11,6 +10,7 @@
 [
 "ZSA_C_PROD_MRKT",
 "ZSA_I_CURRENCY",
+"ZSA_I_LANGUAGE",
 "ZSA_I_PG",
 "ZSA_I_PHASE",
 "ZSA_I_PROD_AMO_CH",

@@ -3,121 +3,212 @@
   headerInfo: { typeName: 'Order',
                 typeNamePlural: 'Orders',
                 typeImageUrl: 'https://i7.pngguru.com/preview/423/632/57/computer-icons-purchase-order-order-fulfillment-purchasing-order-icon.jpg'
-             
-               }
-     }          
+               },
+      presentationVariant: [{ sortOrder: [{ by: 'DeliveryDate', direction:  #ASC }] }]
+     }
 
-annotate view ZSA_C_MRKT_ORDER
-    with 
+annotate view ZSA_C_MRKT_ORDER with
 {
-     @UI.facet: [ 
-             { id: 'GenInfo',
-               type: #COLLECTION,
-               label: 'General Information',
-               position: 10               
-             },
-             { id: 'AdminData',
-               type: #COLLECTION,
-               label: 'Admin Data',
-               position: 20               
-             },                 
-             { id:            'BasicData',
-               purpose:       #STANDARD ,
-               parentId:      'GenInfo',
-               type:          #FIELDGROUP_REFERENCE,
-               label:         'Basic Data',
-               position:       10,
-               targetQualifier: 'BasicData' },
-                          { id:            'CreateInf',
-               purpose:       #STANDARD ,
-               parentId:      'AdminData',
-               type:          #FIELDGROUP_REFERENCE,
-               label:         'Create Info',
-               position:       10,
-               targetQualifier: 'CreateInf' },
-              { id:             'ChangeInf',
-               purpose:       #STANDARD ,
-               parentId:      'AdminData',
-               type:          #FIELDGROUP_REFERENCE,
-               label:         'Change Info',
-               position:       20,
-               targetQualifier: 'ChangeInf' } ]
-    
-    @UI.hidden: true
-    ProdUuid;
-    @UI.hidden: true
-    MrktUuid;
-    @UI.hidden: true
-    OrderUuid;
-@UI: {
-    lineItem: [ { position: 10, importance: #HIGH, label: 'Order ID' } ],
-    fieldGroup: [ { qualifier: 'BasicData',
-                   position: 10,
-                   label: 'Order ID' } ],
-    identification: [{position: 10 }],
-    dataPoint: { title: 'Order ID' }                   
-    }    
-    Orderid;
-@UI: {
-    lineItem: [ { position: 40, importance: #HIGH, label: 'Quantity' } ],
-    fieldGroup: [ { qualifier: 'BasicData',
-                   position: 40,
-                   label: 'Quantity' } ],
-    identification: [{position: 40 }]                  
-    }       
-    Quantity;
-@UI: {
-    lineItem: [ { position: 20, importance: #HIGH, label: 'Year' } ],
-    fieldGroup: [ { qualifier: 'BasicData',
-                   position: 20,
-                   label: 'Year' } ],
-    identification: [{position: 20 }]                  
-    }      
-    CalendarYear;
-@UI: {
-    lineItem: [ { position: 30, importance: #HIGH, label: 'Delivery date' } ],
-    fieldGroup: [ { qualifier: 'BasicData',
-                   position: 30,
-                   label: 'Delivery date' } ],
-    identification: [{position: 30 }]                  
-    }       
-    DeliveryDate;
-@UI: {
-    dataPoint: { title: 'Net Amount1' }, 
-    identification: [{position: 40 }] 
-    }      
-    Netamount;
-@UI: {
-    dataPoint: { title: 'Gross Amount' } 
-    }    
-    Grossamount;
-@UI.hidden: true    
-    Amountcurr;
-@UI: {  
-       fieldGroup: [ { qualifier: 'CreateInf',
-                       position: 10 } ] 
-     }
-CreatedBy;
-@UI: {  
-       fieldGroup: [ { qualifier: 'CreateInf',
-                       position: 20, label: 'Created On' } 
-                        ] 
-     }
-CreationTime;
+  @UI.facet: [
+          { id: 'GenInfo',
+            type: #COLLECTION,
+            label: 'General Information',
+            position: 10
+          },
+          { id: 'BussParData',
+            type: #COLLECTION,
+            label: 'Business Partner',
+            position: 20
+          },
+           { id: 'AddrData',
+            type: #COLLECTION,
+            label: 'Address',
+            position: 30
+          },
+          { id: 'AdminData',
+            type: #COLLECTION,
+            label: 'Admin Data',
+            position: 40
+          },
+          { id:            'BasicData',
+            purpose:       #STANDARD ,
+            parentId:      'GenInfo',
+            type:          #FIELDGROUP_REFERENCE,
+            label:         'Basic Data',
+            position:       10,
+            targetQualifier: 'BasicData' },
+          { id:            'CreateInf',
+            purpose:       #STANDARD ,
+            parentId:      'AdminData',
+            type:          #FIELDGROUP_REFERENCE,
+            label:         'Create Info',
+            position:       10,
+            targetQualifier: 'CreateInf' },
+           { id:             'ChangeInf',
+            purpose:       #STANDARD ,
+            parentId:      'AdminData',
+            type:          #FIELDGROUP_REFERENCE,
+            label:         'Change Info',
+            position:       20,
+            targetQualifier: 'ChangeInf' },
+           { id:              'BussInf',
+            purpose:          #STANDARD ,
+            parentId:         'BussParData',
+            type:             #FIELDGROUP_REFERENCE,
+            label:            'Business Partner Info',
+            position:         10,
+            targetQualifier: 'BussInf' },
+            { id:              'AddrInf',
+            purpose:          #STANDARD ,
+            parentId:         'AddrData',
+            type:             #FIELDGROUP_REFERENCE,
+            label:            'Address Info',
+            position:         40,
+            targetQualifier: 'AddrInf' } ]
 
-@UI: {  
-       fieldGroup: [ { qualifier: 'ChangeInf',
-                       position: 10 } ] 
-     }
-ChangedBy;
+  @UI:{
+      identification: [ { type: #FOR_ACTION, dataAction:'confirmOrder', label: 'Confirm', position: 10 } ],
+      lineItem:       [ { type: #FOR_ACTION, dataAction:'confirmOrder', label: 'Confirm', position: 10 } ]
+      }
 
-@UI: {  
-       fieldGroup: [ { qualifier: 'ChangeInf',
-                       position: 20, label: 'Changed On' } ] 
-     }
-ChangeTime;
-    
-    @UI.hidden: true
-    prodid;
-    
+  @UI.hidden: true
+  ProdUuid;
+  @UI.hidden: true
+  MrktUuid;
+  @UI.hidden: true
+  OrderUuid;
+  @UI: {
+      lineItem: [ { position: 10, importance: #HIGH, label: 'Order ID' } ],
+      fieldGroup: [ { qualifier: 'BasicData',
+                     position: 10,
+                     label: 'Order ID' } ],
+      identification: [{position: 10 }],
+      dataPoint: { title: 'Order ID' }
+      }
+  Orderid;
+  @UI: {
+    lineItem: [ { position: 70, importance: #HIGH, label: 'Confirmed?', criticality: 'Criticality' } ],
+    fieldGroup: [ { qualifier: 'BasicData',
+                    position: 15,
+                    label: 'Confirmed?',
+                    criticality: 'Criticality' } ]
+    }
+  Status;
+  @UI.hidden: true
+  Criticality;
+  @UI: {
+      lineItem: [ { position: 40, importance: #HIGH, label: 'Quantity' } ],
+      fieldGroup: [ { qualifier: 'BasicData',
+                     position: 40,
+                     label: 'Quantity' } ],
+      identification: [{position: 40 }]
+      }
+  Quantity;
+  @UI: {
+      lineItem: [ { position: 20, importance: #HIGH, label: 'Year' } ],
+      fieldGroup: [ { qualifier: 'BasicData',
+                     position: 20,
+                     label: 'Year' } ],
+      identification: [{position: 20 }]
+      }
+  CalendarYear;
+  @UI: {
+      lineItem: [ { position: 30, importance: #HIGH, label: 'Delivery date' } ],
+      fieldGroup: [ { qualifier: 'BasicData',
+                     position: 30,
+                     label: 'Delivery date' } ],
+      identification: [{position: 30 }]
+      }
+  DeliveryDate;
+  @UI: {
+      lineItem: [ { position: 50, importance: #HIGH, label: 'Net Amount' } ],
+      dataPoint: { title: 'Net Amount' },
+      identification: [{position: 40 }]
+      }
+  Netamount;
+  @UI: {
+       lineItem: [ { position: 60, importance: #HIGH, label: 'Gross Amount' } ],
+      dataPoint: { title: 'Gross Amount' }
+      }
+  Grossamount;
+
+  @UI: {
+       dataPoint: { title: 'Business Partner ID' },
+       fieldGroup: [ { qualifier: 'BussInf',
+                     position: 10,
+                     label: 'Business Partner ID' } ],
+       identification: [{position: 10 }]
+      }
+  BusinessPartner;
+  @UI: {
+       fieldGroup: [ { qualifier: 'BussInf',
+                       position: 20,
+                       label: 'Business Partner Group'} ],
+       identification: [{position: 20 }]
+      }
+  BusinessPartnerGroup;
+  @UI: {
+       lineItem: [ { position: 35, importance: #MEDIUM, label: 'Business Partner' } ],
+       fieldGroup: [ { qualifier: 'BussInf',
+                     position: 30,
+                     label: 'Business Partner Name' } ],
+       identification: [{position: 30 }]
+      }
+  BusinessPartnerName;
+  @UI: {
+       fieldGroup: [ { qualifier: 'AddrInf',
+                       position: 10,
+                       label: 'Country' } ]
+      }
+  Country;
+  @UI: {
+       fieldGroup: [ { qualifier: 'AddrInf',
+                       position: 20,
+                       label: 'Street' } ]
+      }
+  Locality;
+  @UI: {
+       fieldGroup: [ { qualifier: 'AddrInf',
+                       position: 30,
+                       label: 'Locality' } ]
+      }
+  Street;
+  @UI: {
+       fieldGroup: [ { qualifier: 'AddrInf',
+                       position: 40,
+                       label: 'House' } ]
+      }
+  House;
+
+  @UI: {
+         lineItem: [{hidden: true}],
+         fieldGroup: [ { qualifier: 'CreateInf',
+                         position: 10, label: 'Created By' } ]
+       }
+  CreatedBy;
+  @UI: {
+         lineItem: [{hidden: true}],
+         fieldGroup: [ { qualifier: 'CreateInf',
+                         position: 20, label: 'Created On' }
+                          ]
+       }
+  CreationTime;
+
+  @UI: {
+         lineItem: [{hidden: true}],
+         fieldGroup: [ { qualifier: 'ChangeInf',
+                         position: 10, label: 'Changed By' } ]
+       }
+  ChangedBy;
+
+  @UI: {
+         lineItem: [{hidden: true}] ,
+         fieldGroup: [ { qualifier: 'ChangeInf',
+                         position: 20, label: 'Changed On' } ]
+       }
+  ChangeTime;
+
+  @UI.hidden: true
+  prodid;
+
 }

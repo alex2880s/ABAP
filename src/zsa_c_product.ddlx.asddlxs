@@ -33,7 +33,13 @@ annotate view ZSA_C_PRODUCT
                label: 'Market Amount',
                targetElement: '_AmoChart',
                position: 50               
-             },               
+             },
+             { id: 'Maps',
+               purpose: #STANDARD,
+               type:    #FIELDGROUP_REFERENCE,
+               label: 'Maps',
+               position: 60               
+             },             
              { id:            'BasicData',
                purpose:       #STANDARD ,
                parentId:      'GenInfo',
@@ -74,13 +80,17 @@ annotate view ZSA_C_PRODUCT
                 type:            #LINEITEM_REFERENCE,
                 label:           'Market',
                 position:        30,
-                targetElement:   '_Market'}                   
+                targetElement:   '_Market'}                 
             ]
+
 @UI.lineItem: [
-    { type: #FOR_ACTION, dataAction:'moveToNextPhase', label: 'Move', position: 10 },
-    { type: #FOR_ACTION, dataAction:'copyProduct',     label: 'Copy', position: 20 }]
+    { type: #FOR_ACTION, dataAction:'moveToNextPhase',  label: 'Move', position: 10 },
+    { type: #FOR_ACTION, dataAction:'copyProduct',      label: 'Copy', position: 20 }
+    ]
 @UI.identification: [
-    { type: #FOR_ACTION, dataAction:'moveToNextPhase', label: 'Move', position: 10 } ] 
+    { type: #FOR_ACTION, dataAction:'moveToNextPhase',  label: 'Move',      position: 10 },
+    { type: #FOR_ACTION, dataAction:'copyProduct',      label: 'Copy',      position: 20},
+    { type: #FOR_ACTION, dataAction:'getProductTransl', label: 'Translate', position: 30 } ] 
                  
 @UI.hidden: true
 ProdUuid;
@@ -92,20 +102,34 @@ ProdUuid;
        dataPoint: { title: 'Product ID' }                
      }
 Prodid;
-@UI: { 
+@UI.hidden:true 
+Pgid;
+@UI: {  
        selectionField: [{position: 30}] , 
-       lineItem: [ { position: 20, importance: #HIGH, label: 'Product Group' } ],
+       lineItem: [ { position: 20, importance: #HIGH, label: 'Product Group'} ],
        fieldGroup: [ { qualifier: 'BasicData',
                        position: 20,
-                       label: 'Product Group' } ] 
-     }
-Pgid;
+                       label: 'Product Group'} ]                 
+     }      
+Pgname;
+@UI: {  
+       fieldGroup: [ { qualifier: 'BasicData',
+                       position: 30,
+                       label: 'Product Group (trans.)'} ]                 
+     }      
+PgnameTr;
+@UI: {  
+       fieldGroup: [ { qualifier: 'BasicData',
+                       position: 35,
+                       label: 'Trans. Lang.'} ]                 
+     }      
+TransCode;
 @UI: { 
        
        selectionField: [{position: 20}] , 
        lineItem: [ { position: 30, importance: #HIGH, label: 'Phase', criticality: 'Criticality'  } ],
        fieldGroup: [ { qualifier: 'BasicData',
-                       position: 30, 
+                       position: 40, 
                        label: 'Phase',
                        criticality: 'Criticality' }] 
      }
@@ -137,7 +161,7 @@ Taxrate;
      }
 ExtPrice;
 @UI: { 
-       lineItem: [ { position: 70, importance: #HIGH } ],
+       lineItem: [ { position: 70, importance: #HIGH} ],
        fieldGroup: [ { qualifier: 'SizeDim',
                        position: 10 } ] 
      }
@@ -172,8 +196,10 @@ CreationTime;
 @UI: {  
        fieldGroup: [ { qualifier: 'ChangeInf',
                        position: 10,
-                       label: 'Changed By' } ]                 
+                       label: 'Changed By' } ],
+       lineItem: [{ hidden: true }]                                 
      }
+     
 ChangedBy;
 @UI: {  
        fieldGroup: [ { qualifier: 'ChangeInf',
@@ -183,4 +209,7 @@ ChangedBy;
 ChangeTime;
 @UI.hidden: true
 Phase;
+@UI.hidden: true
+LocalLastChangedAt;
+
 }

@@ -2,18 +2,22 @@
 @AccessControl.authorizationCheck: #NOT_REQUIRED
 @Metadata.allowExtensions: true
 @Search.searchable: true
+@ObjectModel.semanticKey: ['Mrktid']
 
 define view entity ZSA_C_PROD_MRKT as projection on ZSA_I_PROD_MRKT {
     key ProdUuid,
     key MrktUuid,
-    @Consumption.valueHelpDefinition: [{entity: {name: 'ZSA_I_MARKET', element: 'Mrktid' }}]
-    @ObjectModel.text.element: ['Mrktname']
     @Search.defaultSearchElement: true
     Mrktid,
-    _MarketDesc.Mrktname as Mrktname,
+    @Consumption.valueHelpDefinition: [{entity: {name: 'ZSA_I_MARKET', element: 'Mrktname' }, 
+                                        additionalBinding: [{  element: 'Mrktid', localElement: 'Mrktid' }] }]
+    @ObjectModel.text.element: ['Mrktid']
+    @Search.defaultSearchElement: true
+    Mrktname,
     Status,
     Startdate,
     Enddate,
+    IsoCode,
     CreatedBy,
     CreationTime,
     ChangedBy,
@@ -25,6 +29,8 @@ define view entity ZSA_C_PROD_MRKT as projection on ZSA_I_PROD_MRKT {
     TotalNetamount,
     TotalQuantity,
     amountcurr,
+    LocalLastChangedAt,
+    
     /* Associations */
     _Product : redirected to parent ZSA_C_PRODUCT,
     _Order: redirected to composition child ZSA_C_MRKT_ORDER, 

@@ -5,7 +5,7 @@
 @EndUserText.label: 'Order amount chart'
 
 @UI.chart: [{
-    title:       'Quantity by orders',
+    title:       'Amount by orders',
     description: 'Line-chart displaying the gross amount by customer',
     chartType:    #BAR,
     dimensions:   [ 'DeliveryDate' ], 

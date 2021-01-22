@@ -1,0 +1,6 @@
+ implementation abstract;
+ define behavior for ZSA_A_BUSINESSPARTNER
+  {
+  create;
+ update;
+ }
